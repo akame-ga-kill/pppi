@@ -1,0 +1,157 @@
+# docs/api/swagger.yaml
+openapi: 3.0.3
+info:
+  title: Mini ToDo Manager API
+  description: REST API для мобільного/веб-застосунку управління завданнями (Практична робота №6, UCD-підхід)
+  version: 1.0.0
+  contact:
+    name: Твій ПІБ
+    email: tvoia.pochta@gmail.com
+
+servers:
+  - url: https://todo-manager.example.com/api/v1
+    description: Продакшн сервер (у майбутньому)
+  - url: http://localhost:3000/api/v1
+    description: Локальний сервер розробки
+
+paths:
+  /tasks:
+    get:
+      summary: Отримати всі завдання користувача
+      operationId: getAllTasks
+      tags:
+        - Завдання
+      responses:
+        '200':
+          description: Успішно повернуто список завдань
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          description: Неавторизований доступ
+
+    post:
+      summary: Створити нове завдання
+      operationId: createTask
+      tags:
+        - Завдання
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Завдання успішно створено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Некоректні дані
+
+  /tasks/{id}:
+    get:
+      summary: Отримати завдання за ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Завдання знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+    patch:
+      summary: Оновити завдання (наприклад, статус виконання)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Завдання оновлено
+
+    delete:
+      summary: Видалити завдання
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Завдання успішно видалено
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 42
+        text:
+          type: string
+          example: "Підготуватися до тесту з філософії"
+        deadline:
+          type: string
+          enum: [Сьогодні, Завтра, Цей тиждень, Пізніше]
+          example: Пізніше
+        priority:
+          type: string
+          enum: [Високий, Середній, Низький]
+          example: Високий
+        done:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - text
+        - deadline
+        - priority
+
+    CreateTaskRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        deadline:
+          type: string
+          enum: [Сьогодні, Завтра, Цей тиждень, Пізніше]
+        priority:
+          type: string
+          enum: [Високий, Середній, Низький]
+      required:
+        - text
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        done:
+          type: boolean
+        text:
+          type: string
+        deadline:
+          type: string
+        priority:
+          type: string
